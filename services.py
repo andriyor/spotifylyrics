@@ -70,6 +70,32 @@ def _minilyrics(song):
     return lyrics, url, service_name, timed
 
 
+def _xiami(song):
+    service_name = "Xiami"
+
+    url = "https://www.xiami.com/api/search/searchSongs?_q=%7B%22key%22:%22" + '+'.join(
+        [song.artist, song.name]).replace(' ',
+                                          '+') + "%22,%22pagingVO%22:%7B%22page%22:1,%22pageSize%22:60%7D%7D&_s=" + "c1bd5a1771063cee3593c305d25634a6"
+    api_response = requests.get(url, proxies=request.getproxies())  # TODO fix api request
+
+    api_json = json.loads(api_response.text)
+
+    if 'code' in api_json and api_json["code"] == "SUCCESS":
+        if api_json['result']["status"] == "SUCCESS":
+            if api_json['result']['data']['songs']:
+                lyric_file = ""
+                for api_song in api_json['result']['data']['songs']:
+                    if song.name.lower() in api_song['songName'].lower() and song.artist.lower() in api_song[
+                        'artistName']:
+                        lyric_file = api_song['lyricInfo']['lyricFile']
+                        break
+                if lyric_file:
+                    lyrics_response = requests.get(lyric_file, proxies=request.getproxies())
+                    return lyrics_response.text, lyric_file, service_name, True
+
+    return ERROR, "", service_name, False
+
+
 def _wikia(song):
     service_name = "Wikia"
     url = ""
