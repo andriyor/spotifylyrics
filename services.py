@@ -85,13 +85,14 @@ def _xiami(song):
             if api_json['result']['data']['songs']:
                 lyric_file = ""
                 for api_song in api_json['result']['data']['songs']:
-                    if song.name.lower() in api_song['songName'].lower() and song.artist.lower() in api_song[
-                        'artistName']:
+                    if song.name.lower() in api_song['songName'].lower() and song.artist.lower() in \
+                            api_song['artistName']:
                         lyric_file = api_song['lyricInfo']['lyricFile']
+                        synced = api_song['lyricInfo']['lyricType'] == 7
                         break
                 if lyric_file:
                     lyrics_response = requests.get(lyric_file, proxies=request.getproxies())
-                    return lyrics_response.text, lyric_file, service_name, True
+                    return lyrics_response.text, lyric_file, service_name, synced
 
     return ERROR, "", service_name, False
 
